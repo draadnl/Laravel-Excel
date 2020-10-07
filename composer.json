@@ -19,7 +19,7 @@
   ],
   "require": {
     "php": ">=5.5",
-    "phpoffice/phpexcel": "^1.8.1",
+    "phpoffice/phpexcel": "dev-laravel-6",
     "illuminate/cache": "^6.0",
     "illuminate/config": "^6.0",
     "illuminate/filesystem": "^6.0",
@@ -61,5 +61,11 @@
                 "Excel": "Maatwebsite\\Excel\\Facades\\Excel"
             }
         }
-    }
+    },
+  "repositories": [
+      {
+          "type": "vcs",
+          "url": "https://github.com/draadnl/PHPExcel"
+      }
+  ]
 }
