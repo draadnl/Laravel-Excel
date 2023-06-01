@@ -17,11 +17,6 @@ abstract class ExcelFile extends File {
     protected $enclosure;
 
     /**
-     * @var null
-     */
-    protected $encoding = null;
-
-    /**
      * @param Application $app
      * @param Excel       $excel
      */
@@ -69,9 +64,7 @@ abstract class ExcelFile extends File {
      */
     public function handleImport()
     {
-        return $this->handle(
-            get_class($this)
-        );
+        return $this->handle('Import');
     }
 
     /**
@@ -88,9 +81,7 @@ abstract class ExcelFile extends File {
 
         // Load the file
         $file = $this->excel->load(
-            $this->getFile(),
-            null,
-            $this->encoding
+            $this->getFile()
         );
 
         return $file;

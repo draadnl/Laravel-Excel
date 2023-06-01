@@ -2,8 +2,6 @@
 
 include_once 'classes/TestExport.php';
 include_once 'classes/TestExportHandler.php';
-include_once 'classes/TestNewFile.php';
-include_once 'classes/TestNewFileHandler.php';
 
 class NewExcelFileTest extends TestCase {
 
@@ -11,7 +9,7 @@ class NewExcelFileTest extends TestCase {
     public function testInit()
     {
         $exporter = app('TestExport');
-        $this->assertInstanceOf(\Maatwebsite\Excel\Files\NewExcelFile::class, $exporter);
+        $this->assertInstanceOf('Maatwebsite\Excel\Files\NewExcelFile', $exporter);
     }
 
 
@@ -26,7 +24,7 @@ class NewExcelFileTest extends TestCase {
     {
         $exporter = app('TestExport');
         $exporter->createNewFile();
-        $this->assertInstanceOf(\Maatwebsite\Excel\Writers\LaravelExcelWriter::class, $exporter->getFileInstance());
+        $this->assertInstanceOf('Maatwebsite\Excel\Writers\LaravelExcelWriter', $exporter->getFileInstance());
     }
 
 
@@ -42,11 +40,6 @@ class NewExcelFileTest extends TestCase {
     public function testExportHandler()
     {
         $exporter = app('TestExport');
-        $result = $exporter->handleExport();
-
-        $this->assertEquals('exported', $result);
-
-        $exporter = app('TestNewFile');
         $result = $exporter->handleExport();
 
         $this->assertEquals('exported', $result);

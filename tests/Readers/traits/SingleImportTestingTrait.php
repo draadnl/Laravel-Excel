@@ -6,17 +6,17 @@ trait SingleImportTestingTrait {
     public function testGet()
     {
         $got = $this->loadedFile->get();
-        $this->assertInstanceOf(\Maatwebsite\Excel\Collections\RowCollection::class, $got);
+        $this->assertInstanceOf('Maatwebsite\Excel\Collections\RowCollection', $got);
         $this->assertCount(5, $got);
     }
 
 
     public function testGetWithColumns()
     {
-        $columns = ['heading_one', 'heading_two'];
+        $columns = array('heading_one', 'heading_two');
         $got = $this->loadedFile->get($columns);
 
-        $this->assertInstanceOf(\Maatwebsite\Excel\Collections\RowCollection::class, $got);
+        $this->assertInstanceOf('Maatwebsite\Excel\Collections\RowCollection', $got);
         $this->assertCount(5, $got);
     }
 
@@ -24,7 +24,7 @@ trait SingleImportTestingTrait {
     public function testAll()
     {
         $all = $this->loadedFile->all();
-        $this->assertInstanceOf(\Maatwebsite\Excel\Collections\RowCollection::class, $all);
+        $this->assertInstanceOf('Maatwebsite\Excel\Collections\RowCollection', $all);
         $this->assertCount(5, $all);
     }
 
@@ -32,7 +32,7 @@ trait SingleImportTestingTrait {
     public function testFirst()
     {
         $first = $this->loadedFile->first();
-        $this->assertInstanceOf(\Maatwebsite\Excel\Collections\CellCollection::class, $first);
+        $this->assertInstanceOf('Maatwebsite\Excel\Collections\CellCollection', $first);
 
         // 3 columns
         $this->assertCount(3, $first);
@@ -41,10 +41,10 @@ trait SingleImportTestingTrait {
 
     public function testFirstWithColumns()
     {
-        $columns = ['heading_one', 'heading_two'];
+        $columns = array('heading_one', 'heading_two');
         $first = $this->loadedFile->first($columns);
 
-        $this->assertInstanceOf(\Maatwebsite\Excel\Collections\CellCollection::class, $first);
+        $this->assertInstanceOf('Maatwebsite\Excel\Collections\CellCollection', $first);
         $this->assertCount(count($columns), $first);
     }
 
@@ -55,7 +55,7 @@ trait SingleImportTestingTrait {
 
         $this->loadedFile->each(function($cells) use($me) {
 
-            $me->assertInstanceOf(\Maatwebsite\Excel\Collections\CellCollection::class, $cells);
+            $me->assertInstanceOf('Maatwebsite\Excel\Collections\CellCollection', $cells);
 
         });
     }
@@ -64,35 +64,35 @@ trait SingleImportTestingTrait {
     public function testToArray()
     {
         $array = $this->loadedFile->toArray();
-        $this->assertEquals([
+        $this->assertEquals(array(
 
-            [
+            array(
                 'heading_one'  => 'test',
                 'heading_two'  => 'test',
                 'heading_three'  => 'test',
-            ],
-            [
+            ),
+            array(
                 'heading_one'  => 'test',
                 'heading_two'  => 'test',
                 'heading_three'  => 'test',
-            ],
-            [
+            ),
+            array(
                 'heading_one'  => 'test',
                 'heading_two'  => 'test',
                 'heading_three'  => 'test',
-            ],
-            [
+            ),
+            array(
                 'heading_one'  => 'test',
                 'heading_two'  => 'test',
                 'heading_three'  => 'test',
-            ],
-            [
+            ),
+            array(
                 'heading_one'  => 'test',
                 'heading_two'  => 'test',
                 'heading_three'  => 'test',
-            ]
+            )
 
-        ], $array);
+        ), $array);
     }
 
 
@@ -101,11 +101,11 @@ trait SingleImportTestingTrait {
         $first = $this->loadedFile->first()->toArray();
         $keys  = array_keys($first);
 
-        $this->assertEquals([
+        $this->assertEquals(array(
             'heading_one',
             'heading_two',
             'heading_three'
-        ], $keys);
+        ), $keys);
     }
 
 
@@ -118,11 +118,11 @@ trait SingleImportTestingTrait {
         $first = $loaded->first()->toArray();
         $keys  = array_keys($first);
 
-        $this->assertEquals([
+        $this->assertEquals(array(
             md5('heading one'),
             md5('heading two'),
             md5('heading three')
-        ], $keys);
+        ), $keys);
     }
 
 
@@ -135,11 +135,11 @@ trait SingleImportTestingTrait {
         $first = $loaded->first()->toArray();
         $keys  = array_keys($first);
 
-        $this->assertEquals([
+        $this->assertEquals(array(
             0,
             1,
             2
-        ], $keys);
+        ), $keys);
     }
 
 
@@ -152,11 +152,11 @@ trait SingleImportTestingTrait {
         $first = $loaded->first()->toArray();
         $keys  = array_keys($first);
 
-        $this->assertEquals([
+        $this->assertEquals(array(
             'heading one',
             'heading two',
             'heading three'
-        ], $keys);
+        ), $keys);
     }
 
 
@@ -173,7 +173,7 @@ trait SingleImportTestingTrait {
     public function testByConfig()
     {
         $config = $this->loadedFile->byConfig('excel.import.sheets');
-        $this->assertInstanceOf(\Maatwebsite\Excel\Collections\SheetCollection::class, $config);
+        $this->assertInstanceOf('Maatwebsite\Excel\Collections\SheetCollection', $config);
     }
 
 
@@ -183,10 +183,10 @@ trait SingleImportTestingTrait {
 
         $config = $this->loadedFile->byConfig('excel.import.sheets', function($config) use($me)
         {
-            $me->assertInstanceOf(\Maatwebsite\Excel\Readers\ConfigReader::class, $config);
+            $me->assertInstanceOf('Maatwebsite\Excel\Readers\ConfigReader', $config);
         });
 
-        $this->assertInstanceOf(\Maatwebsite\Excel\Collections\SheetCollection::class, $config);
+        $this->assertInstanceOf('Maatwebsite\Excel\Collections\SheetCollection', $config);
     }
 
 
@@ -212,35 +212,12 @@ trait SingleImportTestingTrait {
         $this->assertEquals(2, $taken->getLimit());
         $this->assertEquals(1, $taken->getSkip());
         $this->assertCount(2, $taken->get());
-        $this->assertCount(3, $taken->first());
-    }
-
-
-    public function testLimitRows()
-    {
-        $taken = $this->loadedFile->limitRows(2, 1);
-        $this->assertEquals(2, $taken->getLimitRows());
-        $this->assertEquals(1, $taken->getSkipRows());
-        $this->assertCount(2, $taken->get());
-        $this->assertCount(3, $taken->first());
-    }
-
-
-    public function testLimitColumns()
-    {
-        $taken = $this->loadedFile->limitColumns(3, 1);
-        $this->assertEquals(3, $taken->getLimitColumns());
-        $this->assertEquals('C', $taken->getTargetLimitColumns());
-        $this->assertEquals(1, $taken->getSkipColumns());
-        $this->assertEquals('B', $taken->getTargetSkipColumns());
-        $this->assertCount(5, $taken->get());
-        $this->assertCount(2, $taken->first());
     }
 
 
     public function testSelect()
     {
-        $columns = ['heading_one', 'heading_two'];
+        $columns = array('heading_one', 'heading_two');
 
         $taken = $this->loadedFile->select($columns);
         $this->assertEquals($columns, $taken->columns);
@@ -266,7 +243,7 @@ trait SingleImportTestingTrait {
     {
         $set = $this->loadedFile->setDateColumns('created_at', 'deleted_at');
         $this->assertTrue($set->needsDateFormatting());
-        $this->assertEquals(['created_at', 'deleted_at'], $set->getDateColumns());
+        $this->assertEquals(array('created_at', 'deleted_at'), $set->getDateColumns());
     }
 
 

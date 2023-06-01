@@ -13,8 +13,7 @@ use Maatwebsite\Excel\Classes\LaravelExcelWorksheet;
  * @author     Maatwebsite <info@maatwebsite.nl>
  * @license    http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt    LGPL
  */
-class CellWriter
-{
+class CellWriter {
 
     /**
      * Current $sheet
@@ -47,23 +46,9 @@ class CellWriter
     public function setValue($value)
     {
         // Only set cell value for single cells
-        if (!str_contains($this->cells, ':')) {
+        if (!str_contains($this->cells, ':'))
+        {
             $this->sheet->setCellValue($this->cells, $value);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Set cell url
-     * @param [type] $url
-     * @return  CellWriter
-     */
-    public function setUrl($url)
-    {
-        // Only set cell value for single cells
-        if (!str_contains($this->cells, ':')) {
-            $this->sheet->getCell($this->cells)->getHyperlink()->setUrl($url);
         }
 
         return $this;
@@ -109,9 +94,9 @@ class CellWriter
      */
     public function setFontFamily($family)
     {
-        return $this->setStyle('font', [
-            'name' => $family,
-        ]);
+        return $this->setStyle('font', array(
+            'name' => $family
+        ));
     }
 
     /**
@@ -121,9 +106,9 @@ class CellWriter
      */
     public function setFontSize($size)
     {
-        return $this->setStyle('font', [
-            'size' => $size,
-        ]);
+        return $this->setStyle('font', array(
+            'size' => $size
+        ));
     }
 
     /**
@@ -133,9 +118,9 @@ class CellWriter
      */
     public function setFontWeight($bold = true)
     {
-        return $this->setStyle('font', [
-            'bold' => ($bold === 'bold' || $bold === true),
-        ]);
+        return $this->setStyle('font', array(
+            'bold' => ($bold == 'bold' || $bold) ? true : false
+        ));
     }
 
     /**
@@ -149,33 +134,22 @@ class CellWriter
     public function setBorder($top = 'none', $right = 'none', $bottom = 'none', $left = 'none')
     {
         // Set the border styles
-        $styles = is_array($top) ? $top : [
-            'top'    => [
-                'style' => $top,
-            ],
-            'left'   => [
+        $styles = is_array($top) ? $top : array(
+            'top'    => array(
+                'style' => $top
+            ),
+            'left'   => array(
                 'style' => $left,
-            ],
-            'right'  => [
+            ),
+            'right'  => array(
                 'style' => $right,
-            ],
-            'bottom' => [
+            ),
+            'bottom' => array(
                 'style' => $bottom,
-            ],
-        ];
+            )
+        );
 
         return $this->setStyle('borders', $styles);
-    }
-
-    /**
-     * Set the text rotation
-     * @param integer $alignment
-     * @return  CellWriter
-     */
-    public function setTextRotation($degrees)
-    {
-        $style = $this->getCellStyle()->getAlignment()->setTextRotation($degrees);
-        return $this;
     }
 
     /**
@@ -185,9 +159,9 @@ class CellWriter
      */
     public function setAlignment($alignment)
     {
-        return $this->setStyle('alignment', [
-            'horizontal' => $alignment,
-        ]);
+        return $this->setStyle('alignment', array(
+            'horizontal' => $alignment
+        ));
     }
 
     /**
@@ -197,20 +171,9 @@ class CellWriter
      */
     public function setValignment($alignment)
     {
-        return $this->setStyle('alignment', [
-            'vertical' => $alignment,
-        ]);
-    }
-
-    /**
-     * Set the text indent
-     * @param integer $indent
-     * @return  CellWriter
-     */
-    public function setTextIndent($indent)
-    {
-        $style = $this->getCellStyle()->getAlignment()->setIndent((int) $indent);
-        return $this;
+        return $this->setStyle('alignment', array(
+            'vertical' => $alignment
+        ));
     }
 
     /**
@@ -224,10 +187,10 @@ class CellWriter
     protected function setColorStyle($styleType, $color, $type = false, $colorType = 'rgb')
     {
         // Set the styles
-        $styles = is_array($color) ? $color : [
+        $styles = is_array($color) ? $color : array(
             'type'  => $type,
-            'color' => [$colorType => str_replace('#', '', $color)],
-        ];
+            'color' => array($colorType => str_replace('#', '', $color))
+        );
 
         return $this->setStyle($styleType, $styles);
     }
@@ -244,9 +207,9 @@ class CellWriter
         $style = $this->getCellStyle();
 
         // Apply style from array
-        $style->applyFromArray([
-            $styleType => $styles,
-        ]);
+        $style->applyFromArray(array(
+            $styleType => $styles
+        ));
 
         return $this;
     }

@@ -8,7 +8,7 @@ class TestCase extends TestBenchTestCase
     public function testExcelClass()
     {
         $excel = App::make('Maatwebsite\Excel\Excel');
-        $this->assertInstanceOf(\Maatwebsite\Excel\Excel::class, $excel);
+        $this->assertInstanceOf('Maatwebsite\Excel\Excel', $excel);
     }
 
 
@@ -20,12 +20,13 @@ class TestCase extends TestBenchTestCase
 
     protected function getPackagePath()
     {
-        return realpath(implode(DIRECTORY_SEPARATOR, [
+        return realpath(implode(DIRECTORY_SEPARATOR, array(
             __DIR__,
             '..',
             'src',
             'Maatwebsite',
             'Excel'
-        ]));
+        )));
     }
+
 }

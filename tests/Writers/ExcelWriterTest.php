@@ -1,6 +1,9 @@
 <?php
 
+use Mockery as m;
 use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Classes;
+use Maatwebsite\Excel\Writers\LaravelExcelWriter;
 
 class ExcelWriterTest extends TestCase {
 
@@ -66,8 +69,8 @@ class ExcelWriterTest extends TestCase {
     {
         // Set params
         $view = 'excel';
-        $data = [];
-        $mergeData = [];
+        $data = array();
+        $mergeData = array();
 
         $viewShared = $this->writer->shareView($view, $data, $mergeData);
         $this->assertEquals($this->writer, $viewShared);
@@ -120,11 +123,11 @@ class ExcelWriterTest extends TestCase {
     public function testMultipleSheets()
     {
         // Set sheet titles
-        $sheets = [
+        $sheets = array(
             'Worksheet 1 title',
             'Worksheet 2 title',
             'Worksheet 3 title'
-        ];
+        );
 
         // Create the sheets
         foreach($sheets as $sheetTitle)
@@ -162,10 +165,10 @@ class ExcelWriterTest extends TestCase {
             $getMethod  = 'get' . ucfirst($prop);
 
             // Set the property with the random value
-            call_user_func_array([$this->writer, $method], [$originalValue]);
+            call_user_func_array(array($this->writer, $method), array($originalValue));
 
             // Get the property back
-            $returnedValue = call_user_func_array([$this->writer->getProperties(), $getMethod], []);
+            $returnedValue = call_user_func_array(array($this->writer->getProperties(), $getMethod), array());
 
             // Check if the properties matches
             $this->assertEquals($originalValue, $returnedValue, $prop . ' doesn\'t match');
@@ -185,31 +188,9 @@ class ExcelWriterTest extends TestCase {
             });
         })->store('csv', __DIR__ . '/exports', true);
 
-        $this->assertFileExists($info['full']);
+        $this->assertTrue(file_exists($info['full']));
     }
 
-    public function testCreateSheetFromArray()
-    {
-        $info = Excel::create('test', function ($writer) {
-            $writer->sheet('test', function ($sheet) {
-                $sheet->createSheetFromArray([
-                    'test data'
-                ]);
-            });
-        })->store('csv', __DIR__ . '/exports', true);
-
-        $this->assertFileExists($info['full']);
-    }
-
-    public function testCreateSheetFromArrayThrowsException()
-    {
-        Excel::create('test', function ($writer) {
-            $writer->sheet('test', function ($sheet) {
-                $this->setExpectedException(PHPExcel_Exception::class);
-                $sheet->createSheetFromArray('test data');
-            });
-        })->store('csv', __DIR__ . '/exports', true);
-    }
 
     public function testNumberPrecision()
     {
@@ -231,7 +212,7 @@ class ExcelWriterTest extends TestCase {
             });
         })->store('xls', __DIR__ . '/exports', true);
 
-        $this->assertFileExists($info['full']);
+        $this->assertTrue(file_exists($info['full']));
 
         $results = Excel::load($info['full'], null, false, true)->calculate()->toArray();
 
@@ -240,87 +221,18 @@ class ExcelWriterTest extends TestCase {
         $this->assertEquals('01234HelloWorld', $results[2]['number']);
         $this->assertEquals('12345678901234567890', $results[3]['number']);
 
-        $this->assertInternalType('double', $results[4]['number']);
+        $this->assertTrue(is_double($results[4]['number']));
         $this->assertEquals((double) 1234, $results[4]['number']);
 
-        $this->assertInternalType('double', $results[5]['number']);
+        $this->assertTrue(is_double($results[5]['number']));
         $this->assertEquals('1234.02', $results[5]['number']);
 
-        $this->assertInternalType('double', $results[6]['number']);
+        $this->assertTrue(is_double($results[6]['number']));
         $this->assertEquals('0.0231231234423', $results[6]['number']);
 
-        $this->assertInternalType('double', $results[7]['number']);
+        $this->assertTrue(is_double($results[7]['number']));
         $this->assertEquals(4195.99253472222, $results[7]['number']);
 
         $this->assertEquals(1234 + 1234, $results[8]['number']);
-    }
-
-    /**
-     * @expectedException Maatwebsite\Excel\Exceptions\LaravelExcelException
-     * @expectedExceptionMessage [ERROR] Aborting spreadsheet render: a minimum of 1 sheet is required.
-     */
-    public function testNoSheets()
-    {
-        Excel::create('no_sheets', function ($writer) {})->string();
-    }
-
-    public function testInvalidExtensionStore()
-    {
-        $file = Excel::create('numbers', function ($writer)
-        {
-            $writer->sheet('test', function ($sheet)
-            {
-                $sheet->fromArray([
-                    'number' => 1234
-                ]);
-            });
-        });
-        $this->setExpectedException(InvalidArgumentException::class);
-        $file->store('invalid file extension');
-    }
-
-    public function testInvalidExtensionDownloadExport()
-    {
-        $file = Excel::create('numbers', function ($writer)
-        {
-            $writer->sheet('test', function ($sheet)
-            {
-                $sheet->fromArray([
-                    'number' => 1234
-                ]);
-            });
-        });
-        $this->setExpectedException(InvalidArgumentException::class);
-        $file->download('invalid file extension');
-    }
-
-    public function testInvalidExtensionString()
-    {
-        $file = Excel::create('numbers', function ($writer)
-        {
-            $writer->sheet('test', function ($sheet)
-            {
-                $sheet->fromArray([
-                    'number' => 1234
-                ]);
-            });
-        });
-        $this->setExpectedException(InvalidArgumentException::class);
-        $file->string('invalid file extension');
-    }
-
-    public function testLoadViewWithDataArray()
-    {
-        View::addLocation(realpath(__DIR__.'/views'));
-
-        $info = Excel::create('numbers', function ($writer)
-        {
-            $writer->sheet('test', function ($sheet)
-            {
-                $sheet->loadView('test')->with(['foo' => 'bar']);
-            });
-        })->store('csv', __DIR__ . '/exports', true);
-
-        $this->assertFileExists($info['full']);
     }
 }

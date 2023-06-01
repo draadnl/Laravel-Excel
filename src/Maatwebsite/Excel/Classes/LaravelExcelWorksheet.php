@@ -5,6 +5,7 @@ use PHPExcel_Cell;
 use PHPExcel_Exception;
 use PHPExcel_Worksheet;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Config;
 use Maatwebsite\Excel\Writers\CellWriter;
 use Maatwebsite\Excel\Exceptions\LaravelExcelException;
 use PHPExcel_Worksheet_PageSetup;
@@ -45,19 +46,19 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
      * Data
      * @var array
      */
-    public $data = [];
+    public $data = array();
 
     /**
      * Merge data
      * @var array
      */
-    public $mergeData = [];
+    public $mergeData = array();
 
     /**
      * Allowed page setup
      * @var array
      */
-    public $allowedPageSetup = [
+    public $allowedPageSetup = array(
         'orientation',
         'paperSize',
         'scale',
@@ -70,17 +71,17 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
         'verticalCentered',
         'printArea',
         'firstPageNumber'
-    ];
+    );
 
     /**
      * Allowed page setup
      * @var array
      */
-    public $allowedStyles = [
+    public $allowedStyles = array(
         'fontFamily',
         'fontSize',
         'fontBold'
-    ];
+    );
 
     /**
      * Check if the file was autosized
@@ -109,9 +110,6 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
     {
         parent::__construct($pParent, $pTitle);
         $this->setParent($pParent);
-        // check if we should generate headings
-        // defaults to true if not overridden by settings
-        $this->autoGenerateHeading = config('excel.export.generate_heading_by_indices', true);
     }
 
     /**
@@ -129,15 +127,15 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
             list($setter, $set) = $this->_setSetter($setup);
 
             // get the value
-            $value = config('excel.sheets.pageSetup.' . $setup, null);
+            $value = Config::get('excel.sheets.pageSetup.' . $setup, null);
 
             // Set the page setup value
             if (!is_null($value))
-                call_user_func_array([$pageSetup, $setter], [$value]);
+                call_user_func_array(array($pageSetup, $setter), array($value));
         }
 
         // Set default page margins
-        $this->setPageMargin(config('excel.export.sheets.page_margin', false));
+        $this->setPageMargin(Config::get('excel.export.sheets.page_margin', false));
     }
 
     /**
@@ -148,7 +146,7 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
     {
         if (!is_array($margin))
         {
-            $marginArray = [$margin, $margin, $margin, $margin];
+            $marginArray = array($margin, $margin, $margin, $margin);
         }
         else
         {
@@ -175,10 +173,9 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
      * Manipulate a single row
      * @param  integer|callback|array $rowNumber
      * @param  array|callback         $callback
-     * @param  boolean                $explicit
      * @return LaravelExcelWorksheet
      */
-    public function row($rowNumber, $callback = null, $explicit = false)
+    public function row($rowNumber, $callback = null)
     {
         // If a callback is given, handle it with the cell writer
         if ($callback instanceof Closure)
@@ -203,11 +200,7 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
                 $cell = $column . $rowNumber;
 
                 // Set the cell value
-                if ($explicit) {
-                    $this->setCellValueExplicit($cell, $rowValue);
-                } else {
-                    $this->setCellValue($cell, $rowValue);
-                }
+                $this->setCellValue($cell, $rowValue);
                 $column++;
             }
         }
@@ -221,10 +214,9 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
     /**
      * Add multiple rows
      * @param  array $rows
-     * @param  boolean $explicit
      * @return LaravelExcelWorksheet
      */
-    public function rows($rows = [], $explicit = false)
+    public function rows($rows = array())
     {
         // Get the start row
         $startRow = $this->getStartRow();
@@ -232,7 +224,7 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
         // Add rows
         foreach ($rows as $row)
         {
-            $this->row($startRow, $row, $explicit);
+            $this->row($startRow, $row);
             $startRow++;
         }
 
@@ -243,10 +235,9 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
      * Prepend a row
      * @param  integer        $rowNumber
      * @param  array|callback $callback
-     * @param  boolean        $explicit
      * @return LaravelExcelWorksheet
      */
-    public function prependRow($rowNumber = 1, $callback = null, $explicit = false)
+    public function prependRow($rowNumber = 1, $callback = null)
     {
         // If only one param was given, prepend it before the first row
         if (is_null($callback))
@@ -259,28 +250,16 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
         $this->insertNewRowBefore($rowNumber);
 
         // Add data to row
-        return $this->row($rowNumber, $callback, $explicit);
-    }
-
-    /**
-     * Prepend a row explicitly
-     * @param  integer        $rowNumber
-     * @param  array|callback $callback
-     * @return LaravelExcelWorksheet
-     */
-    public function prependRowExplicit($rowNumber = 1, $callback = null)
-    {
-        return $this->prependRow($rowNumber, $callback, true);
+        return $this->row($rowNumber, $callback);
     }
 
     /**
      * Append a row
      * @param  integer|callback $rowNumber
      * @param  array|callback   $callback
-     * @param  boolean          $explicit
      * @return LaravelExcelWorksheet
      */
-    public function appendRow($rowNumber = 1, $callback = null, $explicit = false)
+    public function appendRow($rowNumber = 1, $callback = null)
     {
         // If only one param was given, add it as very last
         if (is_null($callback))
@@ -290,41 +269,24 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
         }
 
         // Add the row
-        return $this->row($rowNumber, $callback, $explicit);
-    }
-
-    /**
-     * Append a row explicitly
-     * @param  integer|callback $rowNumber
-     * @param  array|callback   $callback
-     * @return LaravelExcelWorksheet
-     */
-    public function appendRowExplicit($rowNumber = 1, $callback = null)
-    {
-        return $this->appendRow($rowNumber, $callback, true);
+        return $this->row($rowNumber, $callback);
     }
 
     /**
      * Manipulate a single cell
      * @param  array|string $cell
      * @param bool|callable $callback $callback
-     * @param       boolean $explicit
      * @return LaravelExcelWorksheet
      */
-    public function cell($cell, $callback = false, $explicit = false)
+    public function cell($cell, $callback = false)
     {
         // If a callback is given, handle it with the cell writer
         if ($callback instanceof Closure)
             return $this->cells($cell, $callback);
 
         // Else if the 2nd param was set, we will use it as a cell value
-        if ($callback) {
-            if ($explicit) {
-                $this->setCellValueExplicit($cell, $callback);
-            } else {
-                $this->setCellValue($cell, $callback);
-            }
-        }
+        if ($callback)
+            $this->setCellValue($cell, $callback);
 
         return $this;
     }
@@ -353,7 +315,7 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
      */
     public function setView()
     {
-        return call_user_func_array([$this, 'loadView'], func_get_args());
+        return call_user_func_array(array($this, 'loadView'), func_get_args());
     }
 
     /**
@@ -363,7 +325,7 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
      * @param array  $mergeData
      * @return LaravelExcelWorksheet
      */
-    public function loadView($view, $data = [], $mergeData = [])
+    public function loadView($view, $data = array(), $mergeData = array())
     {
         // Init the parser
         if (!$this->parser)
@@ -490,47 +452,47 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
      */
     public function createSheetFromArray($source = null, $nullValue = null, $startCell = 'A1', $strictNullComparison = false)
     {
-        if (!is_array($source))
-            throw new PHPExcel_Exception("Parameter \$source should be an array.");
-
-        //    Convert a 1-D array to 2-D (for ease of looping)
-        if (!is_array(end($source)))
+        if (is_array($source))
         {
-            $source = [$source];
-        }
-
-        // start coordinate
-        list ($startColumn, $startRow) = PHPExcel_Cell::coordinateFromString($startCell);
-
-        $currentRow = $startRow;
-        // Loop through $source
-        foreach ($source as $rowData)
-        {
-            if (!is_array($rowData))
-                throw new PHPExcel_Exception("Row `$rowData` must be array.");
-
-            $currentColumn = $startColumn;
-            foreach ($rowData as $cellValue)
+            //    Convert a 1-D array to 2-D (for ease of looping)
+            if (!is_array(end($source)))
             {
-                if ($strictNullComparison)
-                {
-                    if ($cellValue !== $nullValue)
-                    {
-                        // Set cell value
-                        $this->setValueOfCell($cellValue, $currentColumn, $currentRow);
-                    }
-                }
-                else
-                {
-                    if ($cellValue != $nullValue)
-                    {
-                        // Set cell value
-                        $this->setValueOfCell($cellValue, $currentColumn, $currentRow);
-                    }
-                }
-                $currentColumn++;
+                $source = array($source);
             }
-            $currentRow++;
+
+            // start coordinate
+            list ($startColumn, $startRow) = PHPExcel_Cell::coordinateFromString($startCell);
+
+            // Loop through $source
+            foreach ($source as $rowData)
+            {
+                $currentColumn = $startColumn;
+                foreach ($rowData as $cellValue)
+                {
+                    if ($strictNullComparison)
+                    {
+                        if ($cellValue !== $nullValue)
+                        {
+                            // Set cell value
+                            $this->setValueOfCell($cellValue, $currentColumn, $startRow);
+                        }
+                    }
+                    else
+                    {
+                        if ($cellValue != $nullValue)
+                        {
+                            // Set cell value
+                            $this->setValueOfCell($cellValue, $currentColumn, $startRow);
+                        }
+                    }
+                    ++$currentColumn;
+                }
+                ++$startRow;
+            }
+        }
+        else
+        {
+            throw new PHPExcel_Exception("Parameter \$source should be an array.");
         }
 
         return $this;
@@ -579,12 +541,13 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
      */
     protected function addData($array)
     {
-        // Return empty array
-        if (empty($array))
-            return $this->data;
-
-        // If a parser wasn't set
-        if (!$this->parser)
+        // If a parser was set
+        if ($this->parser)
+        {
+            // Don't change anything
+            $data = $array;
+        }
+        else
         {
             // Transform model/collection to array
             if ($array instanceof Collection)
@@ -594,16 +557,22 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
             $firstRow = reset($array);
 
             // Check if the array has array values
-            if (is_array($firstRow) && count($firstRow) != count($firstRow, 1))
+            if (count($firstRow) != count($firstRow, 1))
             {
                 // Loop through the data to remove arrays
-                $data = [];
-                foreach ($array as $key1 => &$row)
+                $data = array();
+                $r = 0;
+                foreach ($array as $row)
                 {
-                    $data[$key1] = [];
-                    array_walk($row, function($cell, $key2) use ($key1, &$data) {
-                        $data[$key1][$key2] = is_array($cell) ? '': $cell;
-                    });
+                    $data[$r] = array();
+                    foreach ($row as $key => $cell)
+                    {
+                        if (!is_array($cell))
+                        {
+                            $data[$r][$key] = $cell;
+                        }
+                    }
+                    $r++;
                 }
             }
             else
@@ -627,16 +596,12 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
                 }
             }
         }
-        else
-        {
-            $data = $array;
-        }
 
         // Add results
         if (!empty($data))
-            return !empty($this->data) ? array_merge($this->data, $data) : $data;
+            $this->data = !empty($this->data) ? array_merge($this->data, $data) : $data;
 
-        // Return data
+        // return data
         return $this->data;
     }
 
@@ -670,7 +635,10 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
      */
     protected function generateHeadingByIndices()
     {
-        return $this->autoGenerateHeading;
+        if (!$this->autoGenerateHeading)
+            return false;
+
+        return Config::get('excel.export.generate_heading_by_indices', false);
     }
 
     /**
@@ -689,16 +657,16 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
         if (in_array($key, $this->allowedPageSetup))
         {
             // Set params
-            $params = is_array($params) ? $params : [$params];
+            $params = is_array($params) ? $params : array($params);
 
             // Call the setter
-            return call_user_func_array([$this->getPageSetup(), $setter], $params);
+            return call_user_func_array(array($this->getPageSetup(), $setter), $params);
         }
 
         // If is a style
         elseif (in_array($key, $this->allowedStyles))
         {
-            return $this->setDefaultStyles($setter, $key, $params);
+           return $this->setDefaultStyles($setter, $key, $params);
         }
         else
         {
@@ -716,12 +684,12 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
     protected function setDefaultStyles($setter, $key, $params)
     {
         $caller = $this->getDefaultStyle();
-        $params = is_array($params) ? $params : [$params];
+        $params = is_array($params) ? $params : array($params);
 
         if (str_contains($key, 'font'))
             return $this->setFontStyle($caller, $setter, $key, $params);
 
-        return call_user_func_array([$caller, $setter], $params);
+        return call_user_func_array(array($caller, $setter), $params);
     }
 
     /**
@@ -762,7 +730,7 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
     {
         // Set caller to font
         $caller = $caller->getFont();
-        $params = is_array($params) ? $params : [$params];
+        $params = is_array($params) ? $params : array($params);
 
         // Clean the setter name
         $setter = lcfirst(str_replace('Font', '', $setter));
@@ -770,7 +738,7 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
         // Replace special cases
         $setter = str_replace('Family', 'Name', $setter);
 
-        return call_user_func_array([$caller, $setter], $params);
+        return call_user_func_array(array($caller, $setter), $params);
     }
 
     /**
@@ -791,7 +759,7 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
         }
 
         // Return the setter method and the key
-        return [$setter, $key];
+        return array($setter, $key);
     }
 
     /**
@@ -953,7 +921,7 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
         if (isset($this->autoSize))
             return $this->autoSize;
 
-        return config('excel.export.autosize', true);
+        return Config::get('excel.export.autosize', true);
     }
 
     /**
@@ -1047,13 +1015,13 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
      */
     public function setAllBorders($weight = 'thin')
     {
-        $styleArray = [
-            'borders' => [
-                'allborders' => [
+        $styleArray = array(
+            'borders' => array(
+                'allborders' => array(
                     'style' => $weight
-                ]
-            ]
-        ];
+                )
+            )
+        );
 
         // Apply the style
         $this->getDefaultStyle()
@@ -1096,7 +1064,7 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
         // Set center alignment on merge cells
         $this->cells($pRange, function ($cell) use ($alignment)
         {
-            $aligment = is_string($alignment) ? $alignment : config('excel.export.merged_cell_alignment', 'left');
+            $aligment = is_string($alignment) ? $alignment : Config::get('excel.export.merged_cell_alignment', 'left');
             $cell->setAlignment($aligment);
         });
 
@@ -1169,7 +1137,7 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
      */
     protected function getDefaultNullValue()
     {
-        return config('excel.export.sheets.nullValue', null);
+        return Config::get('excel.export.sheets.nullValue', null);
     }
 
     /**
@@ -1178,7 +1146,7 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
      */
     protected function getDefaultStartCell()
     {
-        return config('excel.export.sheets.startCell', 'A1');
+        return Config::get('excel.export.sheets.startCell', 'A1');
     }
 
 
@@ -1188,7 +1156,7 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
      */
     protected function getDefaultStrictNullComparison()
     {
-        return config('excel.export.sheets.strictNullComparison', false);
+        return Config::get('excel.export.sheets.strictNullComparison', false);
     }
 
     /**
@@ -1265,23 +1233,5 @@ class LaravelExcelWorksheet extends PHPExcel_Worksheet {
         is_string($cellValue) && is_numeric($cellValue) && !is_integer($cellValue)
             ? $this->getCell($currentColumn . $startRow)->setValueExplicit($cellValue)
             : $this->getCell($currentColumn . $startRow)->setValue($cellValue);
-    }
-
-    /**
-     * Allowed page setup
-     * @return array
-     */
-    public function getAllowedPageSetup()
-    {
-        return $this->allowedPageSetup;
-    }
-
-    /**
-     * Allowed page setup
-     * @return array
-     */
-    public function getAllowedStyles()
-    {
-        return $this->allowedStyles;
     }
 }

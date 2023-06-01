@@ -2,8 +2,6 @@
 
 include_once 'classes/TestImport.php';
 include_once 'classes/TestImportHandler.php';
-include_once 'classes/TestFile.php';
-include_once 'classes/TestFileHandler.php';
 
 class ExcelFileTest extends TestCase {
 
@@ -11,7 +9,7 @@ class ExcelFileTest extends TestCase {
     public function testInit()
     {
         $importer = app('TestImport');
-        $this->assertInstanceOf(\Maatwebsite\Excel\Files\ExcelFile::class, $importer);
+        $this->assertInstanceOf('Maatwebsite\Excel\Files\ExcelFile', $importer);
     }
 
 
@@ -38,7 +36,7 @@ class ExcelFileTest extends TestCase {
     {
         $importer = app('TestImport');
         $importer->loadFile();
-        $this->assertInstanceOf(\Maatwebsite\Excel\Readers\LaravelExcelReader::class, $importer->getFileInstance());
+        $this->assertInstanceOf('Maatwebsite\Excel\Readers\LaravelExcelReader', $importer->getFileInstance());
     }
 
 
@@ -47,7 +45,7 @@ class ExcelFileTest extends TestCase {
         $importer = app('TestImport');
         $results = $importer->get();
 
-        $this->assertInstanceOf(\Maatwebsite\Excel\Collections\RowCollection::class, $results);
+        $this->assertInstanceOf('Maatwebsite\Excel\Collections\RowCollection', $results);
         $this->assertCount(5, $results);
     }
 
@@ -57,14 +55,9 @@ class ExcelFileTest extends TestCase {
         $importer = app('TestImport');
         $results = $importer->handleImport();
 
-        $this->assertInstanceOf(\Maatwebsite\Excel\Collections\RowCollection::class, $results);
-        $this->assertCount(5, $results);
-
-        $importer = app('TestFile');
-        $results = $importer->handleImport();
-
-        $this->assertInstanceOf(\Maatwebsite\Excel\Collections\RowCollection::class, $results);
+        $this->assertInstanceOf('Maatwebsite\Excel\Collections\RowCollection', $results);
         $this->assertCount(5, $results);
     }
+
 
 }
